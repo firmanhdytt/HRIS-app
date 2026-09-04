@@ -1,0 +1,1 @@
+<img src="{{ asset('images/logo.png') }}" alt="Logo" class="mx-auto w-16 h-16 rounded-full" />
