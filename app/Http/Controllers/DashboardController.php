@@ -16,7 +16,7 @@ class DashboardController extends Controller
     {
         $today        = Carbon::today()->toDateString();
         $todayCarbon  = Carbon::today();
-        $cutOffTelat  = '08:15:00';
+        $cutOffTelat  = '08:05:00';
 
         // ========================
         // MASUK HARI INI

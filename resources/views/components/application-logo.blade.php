@@ -1,1 +1,3 @@
-<img src="{{ asset('images/logo.png') }}" alt="Logo" class="mx-auto w-16 h-16 rounded-full" />
+@props(['class' => 'h-9 w-auto object-contain'])
+
+<img src="{{ asset('images/logo.png') }}" alt="Logo" {{ $attributes->merge(['class' => $class]) }} />

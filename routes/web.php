@@ -9,14 +9,12 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\JadwalPiketController;
 use App\Http\Controllers\RuleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('landing');
 })->name('landing')->withoutMiddleware(['auth']);
-
-// Redirect ke login
-Route::redirect('/', '/login');
 
 // Route Publik Slip Gaji menggunakan Signed URL (bisa diakses karyawan tanpa login via WA)
 Route::get('/public-payroll/{employee_id}/pdf', [PayrollController::class, 'publicPdf'])
@@ -93,6 +91,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // ===============================
@@ -114,6 +113,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
+
+    // CRUD Users
+    Route::resource('users', UserController::class);
 });
 
 // ===============================

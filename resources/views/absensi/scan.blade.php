@@ -1,23 +1,24 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold text-white">Scan QR Absensi</h2>
+        <div class="flex items-center justify-between">
+            <h1 class="text-slate-900 text-xl font-extrabold leading-tight">Scan QR Absensi</h1>
+            <a href="{{ route('absensi.index') }}" class="text-slate-500 hover:text-slate-800 text-xs font-semibold">
+                ← Kembali ke Option Absensi
+            </a>
+        </div>
     </x-slot>
 
-    <div class="max-w-xl mx-auto my-10 px-4">
+    <div class="max-w-xl mx-auto my-8 px-4">
+        <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs text-center relative">
+            <h2 class="text-base font-bold text-slate-900 mb-1">Arahkan Kode QR ke Kamera</h2>
+            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Kamera akan aktif secara otomatis untuk memindai kartu QR Code presensi karyawan.</p>
 
-        <div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl text-center relative">
-            <p class="text-slate-300 text-sm mb-6 leading-relaxed">Arahkan QR Code ke kamera. Kamera akan aktif secara otomatis.</p>
-
-            <div id="reader" class="mx-auto w-full max-w-[380px] overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950"></div>
+            <div id="reader" class="mx-auto w-full max-w-[380px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"></div>
         </div>
 
-        <!-- =======================
-             NOTIFICATION POPUP
-        ======================== -->
-        <div id="notif"
-             class="fixed inset-0 flex items-center justify-center  bg-opacity-40 hidden z-[9999]">
-            <div id="notif-content"
-                 class="p-4 bg-gray-800 text-white rounded-lg shadow-lg text-center"></div>
+        <!-- NOTIFICATION POPUP -->
+        <div id="notif" class="fixed inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs hidden z-[9999]">
+            <div id="notif-content" class="p-4 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 text-center"></div>
         </div>
 
         <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -32,44 +33,37 @@
             function showNotif(message, employeeName = '', type = 'success') {
                 clearTimeout(notifTimeout);
 
-                const colors = {
-                    success: 'bg-green-600',
-                    error: 'bg-red-600',
-                    info: 'bg-yellow-500'
+                const styles = {
+                    success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                    error: 'bg-rose-50 text-rose-800 border-rose-200',
+                    info: 'bg-amber-50 text-amber-800 border-amber-200'
                 };
 
                 notifContent.className =
-                    `inline-block px-6 py-3 rounded-lg shadow-lg text-white text-center ${colors[type]}`;
+                    `inline-block px-8 py-5 rounded-2xl shadow-2xl border text-center ${styles[type] || styles.success}`;
 
                 notifContent.innerHTML = `
-                    <div class="font-bold text-lg mb-2">${message}</div>
-                    ${employeeName ? `<div class="text-sm opacity-80">Karyawan: <span class="font-semibold">${employeeName}</span></div>` : ''}
+                    <div class="font-extrabold text-base mb-1">${message}</div>
+                    ${employeeName ? `<div class="text-xs font-medium opacity-90">Karyawan: <span class="font-bold">${employeeName}</span></div>` : ''}
                 `;
 
                 notif.classList.remove('hidden');
 
-                // Setelah 4 detik → tutup popup → aktifkan kamera lagi
                 notifTimeout = setTimeout(() => {
                     notif.classList.add('hidden');
                     scanner.render(onScanSuccess);
                 }, 2000);
             }
 
-            // ===========================
-            // SCANNER SETUP
-            // ===========================
             scanner = new Html5QrcodeScanner("reader", {
                 fps: 20,
-                qrbox: { width: 300, height: 300 }
+                qrbox: { width: 280, height: 280 }
             });
 
             function onScanSuccess(decodedText) {
                 if (decodedText === last) return;
                 last = decodedText;
 
-                console.log("QR Scanned:", decodedText);
-
-                // Format QR: employee ID: EMP002 - John Doe
                 let matches = decodedText.match(/^employee ID:\s*(.+?)\s*-\s*(.+)$/i);
                 if (!matches) {
                     showNotif("Format QR tidak dikenali", "", "error");
@@ -80,9 +74,7 @@
                 let employeeId = matches[1].trim();
                 let employeeName = matches[2].trim();
 
-                // Hentikan kamera sebelum request
                 scanner.clear().then(() => {
-
                     fetch("{{ route('absensi.scan.process') }}", {
                         method: "POST",
                         headers: {
@@ -93,8 +85,6 @@
                         body: JSON.stringify({ qr_code: employeeId })
                     })
                     .then(async res => {
-
-                        // Jika server balas selain 200
                         if (!res.ok) {
                             const error = await res.json().catch(() => null);
                             showNotif(error?.message ?? "Gagal memproses absensi", "", "error");
@@ -111,9 +101,7 @@
                 }).catch(err => console.error("Gagal stop scanner:", err));
             }
 
-            // Mulai scanner
             scanner.render(onScanSuccess);
         </script>
-
     </div>
 </x-app-layout>

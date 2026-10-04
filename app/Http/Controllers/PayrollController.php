@@ -301,7 +301,7 @@ class PayrollController extends Controller
 
         $labels[]       = $r->periode_from . " s/d " . $r->periode_to;
         $absensi[]      = $bd['total_hari_bekerja'] ?? 0;
-        $lembur[]       = (($bd['jam_lembur'] ?? 0) + (($bd['menit_lembur'] ?? 0) / 60));
+        $lembur[]       = $bd['jam_lembur'] ?? 0;
         $kerajinan[]    = $bd['kerajinan_total'] ?? 0;
         $potongan[]     = $bd['potongan_total'] ?? 0;
         $totalGaji[]    = $r->synced_total_gaji ?? 0;
