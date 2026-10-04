@@ -18,8 +18,8 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() !== 'sqlite') {
-            // 3. Change column type (must use raw SQL)
-            DB::statement('ALTER TABLE payroll_settings MODIFY employee_id VARCHAR(255) NOT NULL');
+            $prefix = DB::getTablePrefix();
+            DB::statement("ALTER TABLE {$prefix}payroll_settings MODIFY employee_id VARCHAR(255) NOT NULL");
         }
     }
 
