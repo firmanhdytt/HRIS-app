@@ -48,8 +48,10 @@ class RfidController extends Controller
             'rfid_uid' => 'required'
         ]);
 
-        // Waktu
-        $now   = Carbon::now('Asia/Jakarta');
+        // Waktu (Mendukung Timestamp Offline jika dikirim dari ESP32)
+        $now   = $request->filled('timestamp') 
+                    ? Carbon::parse($request->timestamp, 'Asia/Jakarta') 
+                    : Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
         $jam   = $now->format('H:i:s');
         $hari  = ucfirst($now->locale('id')->isoFormat('dddd'));
